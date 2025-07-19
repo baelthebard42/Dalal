@@ -75,3 +75,5 @@ class RecruiteeRegistrationSerializer(serializers.ModelSerializer):
             description=validated_data['description']
         )
         return user
+
+

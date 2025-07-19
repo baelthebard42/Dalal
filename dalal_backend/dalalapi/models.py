@@ -50,16 +50,22 @@ class RecruiterProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     organization = models.CharField(max_length=255)
     looking_for = models.TextField()
+    address = models.TextField(blank=True, null=True)
+    preferences = models.TextField(blank=True, null=True)
+    needs = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.user.username
-
 
 class RecruiteeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     dob = models.DateField()
     interests = models.TextField()
     description = models.TextField()
+    cv = models.FileField(upload_to='cvs/', blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    preferences = models.TextField(blank=True, null=True)
+    
 
     def __str__(self):
         return self.user.username
