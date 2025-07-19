@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, RecruiterProfile, RecruiteeProfile
-from .utils import encode_new_recruitee
+from .utils import encode_new_recruitee, encode_new_recruiter
 
 class RecruiterRegistrationSerializer(serializers.ModelSerializer):
     organization = serializers.CharField()
@@ -31,11 +31,13 @@ class RecruiterRegistrationSerializer(serializers.ModelSerializer):
         user.last_name = validated_data['last_name']
         user.save()
 
-        RecruiterProfile.objects.create(
+        recruiter = RecruiterProfile.objects.create(
             user=user,
             organization=validated_data['organization'],
             looking_for=validated_data['looking_for']
         )
+
+        encode_new_recruiter(looking_for=recruiter.looking_for, user_id=recruiter.id)
         return user
 
 

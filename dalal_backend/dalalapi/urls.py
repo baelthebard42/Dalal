@@ -21,5 +21,6 @@ urlpatterns = [
         path('/update/recruiter/address', UpdateRecruiterAddress.as_view()),
     path('/update/recruiter/preferences', UpdateRecruiterPreferences.as_view()),
     path('/update/recruiter/needs', UpdateRecruiterNeeds.as_view()),
+    path('/response', Dalal.as_view())
 
 ]
