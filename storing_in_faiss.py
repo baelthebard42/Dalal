@@ -19,8 +19,7 @@ def extract_text_from_pdf(path):
 
 def get_embeddings(text):
     return model.encode(text)
-
-
+'''
 internal_ids = []
 chunk_to_user = {}  
 chunk_text_map = {} 
@@ -56,17 +55,19 @@ faiss_ids = np.array(internal_ids).astype('int64')
 
 
 index.add_with_ids(embedding_matrix, faiss_ids)
+'''
 
+index = faiss.read_index('recruitee.index')
 
 query = input("Enter your query: ")
 query_embedding = model.encode([query]).astype('float32')
-
-D, I = index.search(query_embedding, k=2)
+faiss.normalize_L2(query_embedding)
+D, I = index.search(query_embedding, k=14)
 
 print(I)
 
 
 
 top_id = I[0][0]
-print(f"\n🔎 Top matched chunk:\n{chunk_text_map[top_id]}")
-print(f"\n👤 Belongs to: {chunk_to_user[top_id]}")
+#print(f"\n🔎 Top matched chunk:\n{chunk_text_map[top_id]}")
+#print(f"\n👤 Belongs to: {chunk_to_user[top_id]}")
