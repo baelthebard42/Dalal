@@ -14,7 +14,7 @@ urlpatterns = [
     path('/logout', LogoutView.as_view(), name='logout'),  
 
      path('/update/recruitee/description', UpdateRecruiteeDescription.as_view()),
-    path('/update/recruitee/cv', UpdateRecruiteeCV.as_view()),
+    
     path('/update/recruitee/address', UpdateRecruiteeAddress.as_view()),
     path('/update/recruitee/preferences', UpdateRecruiteePreferences.as_view()),
 

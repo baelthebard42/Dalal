@@ -20,7 +20,7 @@ def extract_text_from_pdf(path):
 def get_embeddings(text):
     return model.encode(text)
 
-all_chunks = []
+
 internal_ids = []
 chunk_to_user = {}  
 chunk_text_map = {} 
@@ -61,7 +61,10 @@ index.add_with_ids(embedding_matrix, faiss_ids)
 query = input("Enter your query: ")
 query_embedding = model.encode([query]).astype('float32')
 
-D, I = index.search(query_embedding, k=1)
+D, I = index.search(query_embedding, k=2)
+
+print(I)
+
 
 
 top_id = I[0][0]

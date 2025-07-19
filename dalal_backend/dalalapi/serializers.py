@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, RecruiterProfile, RecruiteeProfile
+from .utils import encode_new_recruitee
 
 class RecruiterRegistrationSerializer(serializers.ModelSerializer):
     organization = serializers.CharField()
@@ -41,12 +42,13 @@ class RecruiterRegistrationSerializer(serializers.ModelSerializer):
 class RecruiteeRegistrationSerializer(serializers.ModelSerializer):
     dob = serializers.DateField()
     interests = serializers.CharField()
-    description = serializers.CharField()
+    description = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
+    cv = serializers.FileField()
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'dob', 'interests', 'description', 'password']
+        fields = ['first_name', 'last_name', 'dob', 'interests', 'description', 'cv', 'password']
 
     def create(self, validated_data):
         first_name = validated_data['first_name']
@@ -54,7 +56,6 @@ class RecruiteeRegistrationSerializer(serializers.ModelSerializer):
         username = username_base
         counter = 1
 
-       
         while User.objects.filter(username=username).exists():
             username = f"{username_base}{counter}"
             counter += 1
@@ -68,12 +69,18 @@ class RecruiteeRegistrationSerializer(serializers.ModelSerializer):
         user.last_name = validated_data['last_name']
         user.save()
 
-        RecruiteeProfile.objects.create(
+        recruitee = RecruiteeProfile.objects.create(
             user=user,
             dob=validated_data['dob'],
             interests=validated_data['interests'],
-            description=validated_data['description']
+            description=validated_data.get('description', ''),
+            cv=validated_data['cv']
         )
+
+        encode_new_recruitee(f"./cvs/cv_{recruitee.user.username}.pdf", description=recruitee.description, user_id=recruitee.id )
+
+        
         return user
+
 
 

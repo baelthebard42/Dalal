@@ -60,14 +60,13 @@ class UpdateRecruiteeDescription(APIView):
         desc = request.data.get("description")
         if not desc:
             return Response({"error": "Description required"}, status=400)
-        profile.description += desc
+        profile.description = desc
         profile.save()
         return Response({"message": "Description updated"})
 
-
-class UpdateRecruiteeCV(APIView):
+    
+class UpdateRecruiteeInterests(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
 
     def patch(self, request):
         if request.user.user_type != 'recruitee':
@@ -77,12 +76,15 @@ class UpdateRecruiteeCV(APIView):
         except:
             return Response({"error": "Profile not found"}, status=404)
 
-        cv = request.data.get("cv")
-        if not cv:
-            return Response({"error": "CV file required"}, status=400)
-        profile.cv = cv
+        interests = request.data.get("interests")
+        if not interests:
+            return Response({"error": "Interests required"}, status=400)
+        profile.interests = interests 
         profile.save()
-        return Response({"message": "CV updated"})
+        return Response({"message": "Interest updated"})
+
+
+
 
 
 class UpdateRecruiteeAddress(APIView):
@@ -121,7 +123,7 @@ class UpdateRecruiteePreferences(APIView):
         
         if profile.preferences is None:
             profile.preferences='' 
-        profile.preferences += prefs
+        profile.preferences = prefs
         profile.save()
         return Response({"message": "Preferences updated"})
     
@@ -162,7 +164,7 @@ class UpdateRecruiterPreferences(APIView):
         if profile.preferences is None:
             profile.preferences='' 
 
-        profile.preferences += prefs
+        profile.preferences = prefs
         profile.save()
         return Response({"message": "Preferences updated"})
 

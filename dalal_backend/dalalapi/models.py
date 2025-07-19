@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+def custom_cv_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    return f"cvs/cv_{instance.user.username}.{ext}"
+
+
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, user_type=None):
         if not username or not user_type:
@@ -62,7 +67,7 @@ class RecruiteeProfile(models.Model):
     dob = models.DateField()
     interests = models.TextField()
     description = models.TextField()
-    cv = models.FileField(upload_to='cvs/', blank=True, null=True)
+    cv = models.FileField(upload_to=custom_cv_upload_path)
     address = models.TextField(blank=True, null=True)
     preferences = models.TextField(blank=True, null=True)
     
