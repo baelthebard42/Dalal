@@ -14,6 +14,11 @@ import faiss
 import json
 from .models import *
 from .utils import get_ai_response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status  
+from .serializers import UserSerializer
 
 class RegisterRecruiter(APIView):
     def post(self, request):
@@ -53,7 +58,7 @@ class LogoutView(APIView):
 class UpdateRecruiteeDescription(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruitee':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -72,7 +77,7 @@ class UpdateRecruiteeDescription(APIView):
 class UpdateRecruiteeInterests(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruitee':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -94,7 +99,7 @@ class UpdateRecruiteeInterests(APIView):
 class UpdateRecruiteeAddress(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruitee':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -113,7 +118,7 @@ class UpdateRecruiteeAddress(APIView):
 class UpdateRecruiteePreferences(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruitee':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -134,7 +139,7 @@ class UpdateRecruiteePreferences(APIView):
 class UpdateRecruiterAddress(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruiter':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -153,7 +158,7 @@ class UpdateRecruiterAddress(APIView):
 class UpdateRecruiterPreferences(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruiter':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -176,7 +181,7 @@ class UpdateRecruiterPreferences(APIView):
 class UpdateRecruiterNeeds(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    def post(self, request):
         if request.user.user_type != 'recruiter':
             return Response({"error": "Unauthorized"}, status=403)
         try:
@@ -274,3 +279,9 @@ Additional Information (Retrieved Data from database):
         return Response({
             "response": response_from_dalal
         })
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sendAuthenticatedUser(request):
+    authUser=UserSerializer(request.user)
+    return Response(authUser.data, status=status.HTTP_200_OK )

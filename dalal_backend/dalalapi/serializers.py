@@ -85,4 +85,74 @@ class RecruiteeRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserSerializer(serializers.ModelSerializer):
+    # recruiter related fields
+    organization = serializers.SerializerMethodField()
+    looking_for = serializers.SerializerMethodField()
+
+    # recruitee related fields
+    dob = serializers.SerializerMethodField()
+    interests = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'user_type',
+            'organization',
+            'looking_for',
+            'dob',
+            'interests',
+            'description',
+        ]
+
+    def get_organization(self, obj):
+        if obj.user_type == 'recruiter':
+            try:
+                return obj.recruiterprofile.organization
+            except RecruiterProfile.DoesNotExist:
+                return None
+        return None
+
+    def get_looking_for(self, obj):
+        if obj.user_type == 'recruiter':
+            try:
+                return obj.recruiterprofile.looking_for
+            except RecruiterProfile.DoesNotExist:
+                return None
+        return None
+
+    def get_dob(self, obj):
+        if obj.user_type == 'recruitee':
+            try:
+                return obj.recruiteeprofile.dob
+            except RecruiteeProfile.DoesNotExist:
+                return None
+        return None
+
+    def get_interests(self, obj):
+        if obj.user_type == 'recruitee':
+            try:
+                return obj.recruiteeprofile.interests
+            except RecruiteeProfile.DoesNotExist:
+                return None
+        return None
+
+    def get_description(self, obj):
+        if obj.user_type == 'recruitee':
+            try:
+                return obj.recruiteeprofile.description
+            except RecruiteeProfile.DoesNotExist:
+                return None
+        return None
+
+    
+
+
+
+
+
 
