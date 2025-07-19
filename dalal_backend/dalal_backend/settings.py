@@ -25,6 +25,8 @@ SECRET_KEY = 'django-insecure-77-x22^ow*g^rxfa_cfg@$y!p#knk=_+gof#4$mevi8p)1o_ul
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = 'dalalapi.User'
+
 ALLOWED_HOSTS = []
 
 
