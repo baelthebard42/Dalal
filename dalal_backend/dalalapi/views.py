@@ -13,7 +13,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import json
 from .models import *
-from .utils import get_ai_response
+from .utils import get_langchain_response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -274,7 +274,13 @@ Additional Information (Retrieved Data from database):
 """
 
     
-        response_from_dalal = get_ai_response(formatted_prompt)
+        response_from_dalal = get_langchain_response(
+    user_id=request.user.id,
+    user_type=request.user.user_type,
+    name=name,
+    user_prompt=original_user_prompt,
+    additional_info=additional_info
+)
 
         return Response({
             "response": response_from_dalal

@@ -5,7 +5,14 @@ import faiss
 import numpy as np
 import json, os
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
+from langchain_openai import AzureChatOpenAI
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.chains import LLMChain
+
+
+
 
 load_dotenv()
 
@@ -106,52 +113,58 @@ def encode_new_recruiter(looking_for, user_id):
     with open(MAPPING_PATH_RECRUITER, 'w') as f:
         json.dump(chunk_to_user, f, indent=2)
 
-    
+user_memories = {}
 
-def get_ai_response(prompt):
+def get_langchain_response(user_id, user_type, name, user_prompt, additional_info):
+    if user_id not in user_memories:
+        user_memories[user_id] = []
 
     
-    client = AzureOpenAI(
-    api_key=os.getenv('API_KEY') , 
-    api_version="2025-01-01-preview", 
-    azure_endpoint="https://aqore-hackathon-openai.openai.azure.com"
-)
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": """
-You are Dalal, an AI staffing assistant that acts as a conversational broker between recruiters and job seekers.
+    chat_history = user_memories[user_id]
+
+    llm = AzureChatOpenAI(
+        deployment_name="gpt-4o",
+        openai_api_key=os.getenv("API_KEY"),
+        azure_endpoint="https://aqore-hackathon-openai.openai.azure.com",
+        openai_api_version="2025-01-01-preview",
+        temperature=0.7
+    )
+
+   
+    messages = [
+        SystemMessage(content=f"""
+You are Dalal, an AI staffing assistant that brokers between recruiters and recruitees.
 
 Your job is to:
-- Help recruiters find suitable candidates based on natural language queries.
-- Help job seekers discover relevant jobs and update their profiles.
+- Help recruiters find candidates using natural language queries.
+- Help job seekers find jobs and update profiles.
 
-It will be defined in the prompt if the user is a recruiter or recruitee. One user cannot be both at a time. If not defined, ask and keep track 
-You will receive structured information about recruiters or recruitees from a central database.
-Your responses must be based on:
-- The user’s query
-- The retrieved data
-- Applying smart filtering to return only the most relevant results.
+NEVER hallucinate. If something isn't available, say so politely.
 
-You should:
-- Answer naturally and professionally.
-- Summarize, filter, and rephrase data clearly.
-- Ask clarifying questions if the request is vague.
-- Tell the politely to stay in topic if any question out of this scope is asked
-            
+Prompter: {name}, Type: {user_type}
 
-You must not hallucinate missing data. If something isn’t available, inform the user politely and suggest next steps.
+Original Prompt: {user_prompt}
 
-Most important: You will be given prompts in two parts: Original User Prompt and Additional Information. Always prioritize the user prompt and discard the additional information if irrelevant.
-             If the additional info consists info the prompt doesnt ask for, discard them as well. 
-"""
-},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-    )
-    return response.choices[0].message.content
+Additional Information (from database):
+{additional_info}
+""")
+    ]
     
+   
+    messages.extend(chat_history)
+    
+    
+    messages.append(HumanMessage(content=user_prompt))
 
+   
+    response = llm(messages)
+    
+    
+    user_memories[user_id].append(HumanMessage(content=user_prompt))
+    user_memories[user_id].append(AIMessage(content=response.content))
+    
+    
+    if len(user_memories[user_id]) > 20:  
+        user_memories[user_id] = user_memories[user_id][-20:]
 
-print(get_ai_response("find me best jobs"))
+    return response.content
