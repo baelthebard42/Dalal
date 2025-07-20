@@ -13,7 +13,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import json
 from .models import *
-from .utils import get_langchain_response
+from .utils import get_langchain_response, extract_text_from_pdf
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -210,9 +210,12 @@ class Dalal(APIView):
         if request.user.user_type == 'recruitee':
             index = faiss.read_index('recruiter.index')
             json_file = 'chunk_to_recruiter.json'
+            
+            cv_data_user = extract_text_from_pdf(f'./cvs/cv_{request.user.username}.pdf')
         else:
             index = faiss.read_index('recruitee.index')
             json_file = 'chunk_to_recruitee.json'
+            cv_data_user =''
 
         prompt_embedding = model.encode([original_user_prompt]).astype('float32')
         faiss.normalize_L2(prompt_embedding)
@@ -254,6 +257,7 @@ Name: {profile.user.first_name} {profile.user.last_name}
 Interests: {profile.interests}
 Description: {profile.description}
 Preferences: {profile.preferences or 'Not specified'}
+CV details: {extract_text_from_pdf(profile.cv)}
 
 """
 
@@ -267,7 +271,7 @@ Preferences: {profile.preferences or 'Not specified'}
         additional_info = "\n\n---\n\n".join(combined_infos)
         formatted_prompt = f"""
         Prompter information: Name: {name}, account_type: {request.user.user_type}
-Original User Prompt: {original_user_prompt}
+Original User Prompt: {original_user_prompt} More info of prompter (for recruitee only, empty if recruiter): {cv_data_user}
 
 Additional Information (Retrieved Data from database):
 {additional_info}
@@ -279,7 +283,7 @@ Additional Information (Retrieved Data from database):
     user_type=request.user.user_type,
     name=name,
     user_prompt=original_user_prompt,
-    additional_info=additional_info
+    additional_info=formatted_prompt
 )
 
         return Response({
